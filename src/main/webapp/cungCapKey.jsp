@@ -22,19 +22,25 @@
         </a>
         </h1>
 
-        <p>Đăng kí thành công, Vui Lòng Lưu Private Key</p>
-        <div>
-            <label for="publicKey">Public Key:</label>
+        <p style="text-align: center; color: red">${register_success}</p>
+        <label for="publicKey">Public Key: </label>
+        <div style="text-align: center">
             <textarea id="publicKey" rows="4" cols="50" readonly>
                 ${publicKey}
             </textarea>
         </div>
 
         <!-- Liên kết tải Private Key -->
-        <div>
+        <label >Private Key: </label>
+        <div style="text-align: center">
             <a href="downloadPrivateKey?fileName=${privateKeyFilePath}" class="btn btn-success mt-3">Tải Private Key</a>
         </div>
-
+        <div class="mt-2">
+            <p>
+                Nếu bạn đã lưu Private Key, bạn có thể tiến hành <a class="primary-link"
+                                                  href="dangNhap.jsp"> đăng nhập</a>
+            </p>
+        </div>
 
 
 
