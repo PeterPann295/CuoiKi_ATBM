@@ -18,6 +18,7 @@ import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class CustomerSerlvet extends HttpServlet {
     private OrderDao orderDao = new OrderDao();
     private OrderItemDao orderItemDao = new OrderItemDao();
     private ImportProductDao importProductDao = new ImportProductDao();
-
+    private KeyPairModelDao keyPairModelDao = new KeyPairModelDao();
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -250,14 +251,16 @@ public class CustomerSerlvet extends HttpServlet {
         if (!error) {
             Customer cus = new Customer(username, Encode.toSHA1(password), fullName, phone, email);
             cusDao.insert(cus);
-            req.setAttribute("register_success", "Chức mừng bạn đăng kí thành công, vui lòng lưu Private Key");
+            req.setAttribute("register_success", "Chức mừng bạn đăng kí thành công. Đây là cặp khóa public key và private key. Vui lòng lưu Private Key để có thể tiến hành đặt hàng");
             url = "/cungCapKey.jsp";
             try {
                 DS ds = new DS();
                 ds.generateKey();
                 String publicKey = ds.exportPublicKey();
                 String privateKey = ds.exportPrivateKey();
+                Customer customer = cusDao.selectByUsername(username);
 
+                keyPairModelDao.insert(new KeyPairModel(customer.getId(), publicKey, "active"));
                 // Lưu Public Key để hiển thị trên giao diện
                 req.setAttribute("publicKey", publicKey);
 
