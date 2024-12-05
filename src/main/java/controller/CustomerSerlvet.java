@@ -2,6 +2,7 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import cypher.DS;
 import database.*;
 import model.*;
 import org.apache.http.client.fluent.Response;
@@ -17,6 +18,7 @@ import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -244,11 +246,31 @@ public class CustomerSerlvet extends HttpServlet {
             url = "/dangKi.jsp";
             req.setAttribute("err_password", "Mật khẩu tối thiểu 6 kí tự");
         }
+
         if (!error) {
             Customer cus = new Customer(username, Encode.toSHA1(password), fullName, phone, email);
             cusDao.insert(cus);
-            req.setAttribute("register_success", "Chức mừng bạn đăng kí thành công, vui lòng đăng nhập");
-            url = "/dangNhap.jsp";
+            req.setAttribute("register_success", "Chức mừng bạn đăng kí thành công, vui lòng lưu Private Key");
+            url = "/cungCapKey.jsp";
+            try {
+                DS ds = new DS();
+                ds.generateKey();
+                String publicKey = ds.exportPublicKey();
+                String privateKey = ds.exportPrivateKey();
+
+                // Lưu Public Key để hiển thị trên giao diện
+                req.setAttribute("publicKey", publicKey);
+
+                // Tạo file Private Key và cung cấp đường dẫn tải xuống
+                String filePath = getServletContext().getRealPath("/") + "private_key_" + username + ".txt";
+                try (PrintWriter writer = new PrintWriter(filePath)) {
+                    writer.write(privateKey);
+                }
+                req.setAttribute("privateKeyFilePath", "private_key_" + username + ".txt");
+
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         }
         req.getRequestDispatcher(url).forward(req, resp);
     }
