@@ -62,6 +62,15 @@ public class DS {
         KeyFactory keyFactory = KeyFactory.getInstance(alg);
         privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
     }
+    public boolean isKeyPairValid() {
+        try {
+            String testMessage = "Test message";
+            String testSignature = signData(testMessage);
+            return verifySignature(testMessage, testSignature);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         DS ds = new DS();

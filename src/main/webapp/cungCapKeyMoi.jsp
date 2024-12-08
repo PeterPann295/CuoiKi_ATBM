@@ -35,12 +35,7 @@
         <div style="text-align: center">
             <a href="downloadPrivateKey?fileName=${privateKeyFilePath}" class="btn btn-success mt-3">Tải Private Key</a>
         </div>
-        <div class="mt-2">
-            <p>
-                Nếu bạn đã lưu Private Key, bạn có thể tiến hành <a class="primary-link"
-                                                  href="dangNhap.jsp"> đăng nhập</a>
-            </p>
-        </div>
+
 
     </form>
 </div>
