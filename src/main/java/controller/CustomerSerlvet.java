@@ -826,7 +826,7 @@ public class CustomerSerlvet extends HttpServlet {
             Customer customer = cusDao.selectByUsername(username);
             String resetCode = RandomNumberGenerator.generateRandomNumbersString();
             cusDao.updateResetCode(resetCode, customer.getUsername());
-            Email.sendEmaiQuenMatKhau("Quên Mật Khẩu",customer, resetCode);
+            Email.sendEmaiQuenMatKhau(customer, resetCode);
             session.setAttribute("customer_resetPassword", customer);
             url = "/datLaiMatKhau.jsp";
         }
