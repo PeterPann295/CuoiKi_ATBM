@@ -34,6 +34,14 @@ public class KeyPairModel {
         return customerId;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
     public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }

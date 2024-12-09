@@ -14,7 +14,7 @@
 <%@ include file="layouts/header.jsp" %>
 
 <div class="container_form content">
-    <form action="customer?action=login" id="form-login"  method="post" class="form-container">
+    <form action="customer?action=confirmKeyPairs"  method="post" class="form-container">
         <h1 class="text-center mb-3 text-success ">
             Luu Key <a href="#" class="logo-link"> <img
                 style="width: 60px; height: 60px" src="assets/images/rau.png" alt="Logo"
@@ -22,25 +22,22 @@
         </a>
         </h1>
 
-        <p style="text-align: center; color: red">${register_success}</p>
+        <p style="text-align: center; color: red">${confirm_success}</p>
         <label for="publicKey">Public Key: </label>
         <div style="text-align: center">
-            <textarea id="publicKey" rows="4" cols="50" readonly>
-                ${publicKey}
+            <textarea id="publicKey" name="publicKey" rows="4" cols="50" required>
+
             </textarea>
         </div>
-
-        <!-- Liên kết tải Private Key -->
-        <label >Private Key: </label>
+        <p> Vui lòng tạo chữ kí với văn bản sau để xác thực khóa : <b> ${text_test_key} </b> </p>
+        <label for="sign">Chữ kí : </label>
         <div style="text-align: center">
-            <a href="downloadPrivateKey?fileName=${privateKeyFilePath}" class="btn btn-success mt-3">Tải Private Key</a>
-        </div>
-        <div class="mt-2">
-            <p>
-                Nếu bạn đã lưu Private Key, bạn có thể tiến hành <a class="primary-link"
-                                                  href="dangNhap.jsp"> đăng nhập</a>
-            </p>
-        </div>
+            <textarea id="sign"  name="sign" rows="4" cols="50" required>
 
+            </textarea>
+        </div>
+        <button type="submit"  style="height: 47.33px" class="btn btn-primary mb-2 margin-button">Đăng
+    Nhập
+    </button>
     </form>
 </div>
