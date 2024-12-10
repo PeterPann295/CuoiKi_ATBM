@@ -59,7 +59,7 @@ public class ParentCategoryDao extends AbsDao<ParentCategory> {
         ParentCategory parentCategory = null;
         try {
             Connection con = JDBCUtil.getConnection();
-            String sql = "SELECT * FROM ParentCategories WHERE id = ?";
+            String sql = "SELECT * FROM Parent_Categories WHERE id = ?";
             PreparedStatement pst = con.prepareStatement(sql);
             pst.setInt(1, id);
             ResultSet rs = pst.executeQuery();
@@ -81,7 +81,7 @@ public class ParentCategoryDao extends AbsDao<ParentCategory> {
         ArrayList<ParentCategory> categories = new ArrayList<ParentCategory>();
         try {
             Connection con = JDBCUtil.getConnection();
-            String sql = "Select * from ParentCategories";
+            String sql = "Select * from Parent_Categories";
             PreparedStatement pst = con.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
             while(rs.next()) {
