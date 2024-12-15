@@ -227,7 +227,7 @@ public class CustomerDao extends AbsDao<Customer> {
             Connection con = JDBCUtil.getConnection();
             String sql = "UPDATE Customers SET reset_code=? WHERE username = ?";
             PreparedStatement pst = con.prepareStatement(sql);
-            pst.setInt(1,Integer.parseInt(resetCode));
+            pst.setString(1,resetCode);
             pst.setString(2, username);
             int i = pst.executeUpdate();
             JDBCUtil.closeConnection(con);
