@@ -94,7 +94,7 @@ public class Email {
         }
     }
 
-    public static boolean sendEmaiQuenMatKhau(Customer customer, String resetCode) {
+    public static boolean sendEmaiQuenMatKhau(String title,Customer customer, String resetCode) {
         // Properties : khai báo các thuộc tính
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com"); // SMTP HOST
@@ -128,7 +128,7 @@ public class Email {
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(customer.getEmail(), false));
 
             // Tiêu đề email
-            msg.setSubject("Quên Mật Khẩu");
+            msg.setSubject(title);
 
             // Quy đinh ngày gửi
             msg.setSentDate(new Date());

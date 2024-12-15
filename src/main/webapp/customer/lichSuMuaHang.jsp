@@ -31,6 +31,27 @@
         .a{
             text-decoration: none;
         }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table th, table td {
+            border: 2px solid #ddd; /* Đường viền đậm */
+            padding: 8px;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f2f2f2; /* Màu nền xen kẽ */
+        }
+
+
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -67,7 +88,7 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-shopping">
+                    <table class="styled-table">
                         <tr>
 
                             <th class="text-center">Mã Đơn Hàng</th>

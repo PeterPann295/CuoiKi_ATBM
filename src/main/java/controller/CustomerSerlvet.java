@@ -2,6 +2,8 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import cypher.DS;
+import cypher.SHA;
 import database.*;
 import model.*;
 import org.apache.http.client.fluent.Response;
@@ -17,6 +19,8 @@ import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +40,8 @@ public class CustomerSerlvet extends HttpServlet {
     private OrderDao orderDao = new OrderDao();
     private OrderItemDao orderItemDao = new OrderItemDao();
     private ImportProductDao importProductDao = new ImportProductDao();
-
+    private KeyPairModelDao keyPairModelDao = new KeyPairModelDao();
+    private SHA sha = new SHA();
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -107,6 +112,48 @@ public class CustomerSerlvet extends HttpServlet {
             resetPassword(req, resp);
         } else if (action.equals("goListProduct")) {
             goListProduct(req,resp);
+        } else if(action.equals("importNewKeyPairs")){
+            try {
+                importNewKeyPairs(req,resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }else if(action.equals("confirmCodeImportNewKey")){
+            try {
+                confirmCodeImportNewKey(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }else if(action.equals("confirmKeyPairs")){
+            try {
+                confirmKeyPairs(req,resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }else if(action.equals("createNewKeyPair")){
+            try {
+                createNewKeyPair(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else if(action.equals("confirmCodeCreateNewKey")){
+            try {
+                confirmCodeCreateNewKey(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else if (action.equals("requireRevokeKey")) {
+            try {
+                requireRevokeKey(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else if(action.equals("confirmRevokeKey")){
+            try {
+                confirmRevokeKey(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -244,11 +291,33 @@ public class CustomerSerlvet extends HttpServlet {
             url = "/dangKi.jsp";
             req.setAttribute("err_password", "Mật khẩu tối thiểu 6 kí tự");
         }
+
         if (!error) {
             Customer cus = new Customer(username, Encode.toSHA1(password), fullName, phone, email);
             cusDao.insert(cus);
-            req.setAttribute("register_success", "Chức mừng bạn đăng kí thành công, vui lòng đăng nhập");
-            url = "/dangNhap.jsp";
+            req.setAttribute("register_success", "Chức mừng bạn đăng kí thành công. Đây là cặp khóa public key và private key. Vui lòng lưu Private Key để có thể tiến hành đặt hàng");
+            url = "/cungCapKey.jsp";
+            try {
+                DS ds = new DS();
+                ds.generateKey();
+                String publicKey = ds.exportPublicKey();
+                String privateKey = ds.exportPrivateKey();
+                Customer customer = cusDao.selectByUsername(username);
+
+                keyPairModelDao.insert(new KeyPairModel(customer.getId(), publicKey, "active"));
+                // Lưu Public Key để hiển thị trên giao diện
+                req.setAttribute("publicKey", publicKey);
+
+                // Tạo file Private Key và cung cấp đường dẫn tải xuống
+                String filePath = getServletContext().getRealPath("/") + "private_key_" + username + ".txt";
+                try (PrintWriter writer = new PrintWriter(filePath)) {
+                    writer.write(privateKey);
+                }
+                req.setAttribute("privateKeyFilePath", "private_key_" + username + ".txt");
+
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         }
         req.getRequestDispatcher(url).forward(req, resp);
     }
@@ -807,6 +876,189 @@ public class CustomerSerlvet extends HttpServlet {
         String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
                 + req.getContextPath();
         resp.sendRedirect(link + "/sanPham.jsp");
+    }
+    private void importNewKeyPairs(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        String id = req.getParameter("id");
+        int idUser = Integer.parseInt(id);
+        boolean error = false;
+        HttpSession session = req.getSession();
+        String url = "";
+
+        Customer customer = cusDao.selectById(idUser);
+        String resetCode = RandomNumberGenerator.generateRandomNumbersString();
+        String message = resetCode + "nhapkhoamoi";
+        String hash = sha.hashText(message);
+        cusDao.updateResetCode(hash, customer.getUsername());
+        Email.sendEmaiQuenMatKhau("Nhập Khóa Mới",customer, resetCode);
+        session.setAttribute("customer_resetPassword", customer);
+        url = "/xacThucMaNhapKhoaMoi.jsp";
+
+        String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
+                + req.getContextPath();
+        resp.sendRedirect(link + url);
+    }
+
+    private void confirmCodeImportNewKey(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        String resetCode = req.getParameter("resetCode");
+        HttpSession session = req.getSession();
+        String url = "";
+        Customer customer = (Customer) session.getAttribute("customer_resetPassword");
+        String message = resetCode + "nhapkhoamoi";
+        String textConfirm = customer.getFullName() + customer.getId() + customer.getEmail();
+        String hashText = sha.hashText(textConfirm);
+        session.setAttribute("text_test_key", hashText);
+        String hash = sha.hashText(message);
+        if(cusDao.checkResetCode(customer.getUsername(), hash)){
+            session.setAttribute("confirm_success", "Xác thực mã thành công. Vui lòng nhập khóa mới");
+            url = "/nhapKhoaMoi.jsp";
+        }else{
+            url = "/xacThucMaNhapKhoaMoi.jsp";
+            session.setAttribute("error_resetCode", "Mã xác nhận không chính xác");
+
+        }
+
+        String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
+                + req.getContextPath();
+        resp.sendRedirect(link + url);
+    }
+    private void confirmKeyPairs(HttpServletRequest req, HttpServletResponse resp) throws Exception{
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        HttpSession session = req.getSession();
+        Customer customer = (Customer) session.getAttribute("customer_login");
+        String publicKey = req.getParameter("publicKey");
+        String textTest = (String) session.getAttribute("text_test_key");
+        String sign = req.getParameter("sign");
+        DS ds = new DS();
+        ds.importPublicKey(publicKey, "RSA");
+        String url = "";
+        if(ds.verifySignature(textTest, sign)){
+
+            keyPairModelDao.insertWithStatusUpdate(new KeyPairModel(customer.getId(), publicKey, "active"));
+
+            session.setAttribute("create_success", "Chúc mừng bạn đã tạo thành công cặp khóa mới");
+            url = "/taoKhoaMoiThanhCong.jsp";
+        }else{
+            session.setAttribute("confirm_success", "Cặp Khóa Không Hợp Lệ");
+            url = "/nhapKhoaMoi.jsp";
+        }
+        String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
+                + req.getContextPath();
+        resp.sendRedirect(link + url);
+
+    }
+
+    private void createNewKeyPair(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        String id = req.getParameter("id");
+        int idUser = Integer.parseInt(id);
+        boolean error = false;
+        HttpSession session = req.getSession();
+        String url = "";
+
+        Customer customer = cusDao.selectById(idUser);
+        String resetCode = RandomNumberGenerator.generateRandomNumbersString();
+        String message = resetCode + "taokhoamoi";
+        String hash = sha.hashText(message);
+        cusDao.updateResetCode(hash, customer.getUsername());
+        Email.sendEmaiQuenMatKhau("Tạo Khóa Mới",customer, resetCode);
+        session.setAttribute("customer_resetPassword", customer);
+        url = "/xacThucMaTaoKhoaMoi.jsp";
+
+        String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
+                + req.getContextPath();
+        resp.sendRedirect(link + url);
+    }
+    private void confirmCodeCreateNewKey(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        String resetCode = req.getParameter("resetCode");
+        HttpSession session = req.getSession();
+        String url = "";
+        Customer customer = (Customer) session.getAttribute("customer_resetPassword");
+        String message = resetCode + "taokhoamoi";
+        req.setAttribute("register_success", "Chức mừng bạn tạo khóa mới thành công. Đây là cặp khóa public key và private key. Vui lòng lưu Private Key để có thể tiến hành đặt hàng");
+
+        String hash = sha.hashText(message);
+        if(cusDao.checkResetCode(customer.getUsername(), hash)){
+            DS ds = new DS();
+            ds.generateKey();
+            keyPairModelDao.insertWithStatusUpdate(new KeyPairModel(customer.getId(), ds.exportPublicKey(), "active"));
+            req.setAttribute("publicKey", ds.exportPublicKey());
+
+            // Tạo file Private Key và cung cấp đường dẫn tải xuống
+            String filePath = getServletContext().getRealPath("/") + "private_key_" + customer.getUsername() + ".txt";
+            try (PrintWriter writer = new PrintWriter(filePath)) {
+                writer.write(ds.exportPrivateKey());
+            }
+            req.setAttribute("privateKeyFilePath", "private_key_" + customer.getUsername() + ".txt");
+            url = "/cungCapKeyMoi.jsp";
+        }else{
+            url = "/xacThucMaTaoKhoaMoi.jsp";
+            session.setAttribute("error_resetCode", "Mã xác nhận không chính xác");
+
+        }
+
+        req.getRequestDispatcher(url).forward(req, resp);
+    }
+    private void requireRevokeKey(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        String id = req.getParameter("id");
+        int idUser = Integer.parseInt(id);
+        boolean error = false;
+        HttpSession session = req.getSession();
+        String url = "";
+
+        Customer customer = cusDao.selectById(idUser);
+        String resetCode = RandomNumberGenerator.generateRandomNumbersString();
+        String message = resetCode + "khoabilo";
+        String hash = sha.hashText(message);
+        cusDao.updateResetCode(hash, customer.getUsername());
+        Email.sendEmaiQuenMatKhau("Xác nhận thông báo khóa  bị lộ",customer, resetCode);
+        session.setAttribute("customer_resetPassword", customer);
+        url = "/xacThucKhoaBiLo.jsp";
+
+        String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
+                + req.getContextPath();
+        resp.sendRedirect(link + url);
+    }
+    private void confirmRevokeKey(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        String resetCode = req.getParameter("resetCode");
+        HttpSession session = req.getSession();
+        String url = "";
+        Customer customer = (Customer) session.getAttribute("customer_resetPassword");
+        String message = resetCode + "khoabilo";
+        req.setAttribute("register_success", "Chức mừng bạn tạo khóa mới thành công. Đây là cặp khóa public key và private key. Vui lòng lưu Private Key để có thể tiến hành đặt hàng");
+
+        String hash = sha.hashText(message);
+        if(cusDao.checkResetCode(customer.getUsername(), hash)){
+            DS ds = new DS();
+            ds.generateKey();
+            keyPairModelDao.revokeAllKeyByCustomerId(customer.getId());
+            req.setAttribute("revoke_success", "Thu hồi khóa thành công, vui lòng tạo khóa mới để có thể đặt hàng");
+            url = "/thuHoiKhoaThanhCong.jsp";
+        }else{
+            url = "/xacThucKhoaBiLo.jsp";
+            session.setAttribute("error_resetCode", "Mã xác nhận không chính xác");
+
+        }
+
+        req.getRequestDispatcher(url).forward(req, resp);
     }
 
 }

@@ -87,7 +87,12 @@
                                     <li><a class="dropdown-item" href="<c:url value='../customer/thayDoiMatKhau.jsp'/>">Thay đổi mật khẩu</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='../customer/thayDoiThongTin.jsp'/>">Thay đổi thông tin</a></li>
                                 </c:if>
+
                                 <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="<c:url value='../customer/quanLyKhoa.jsp'/>">Quản lý khóa</a></li>
+                                <li><hr class="dropdown-divider"></li>
+
+
                                 <c:if test="${sessionScope.customer_login.role == true}">
                                     <li><a class="dropdown-item" href="<c:url value='../admin/thongKe.jsp'/>">Trang quản trị</a></li>
 
