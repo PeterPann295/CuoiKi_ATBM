@@ -12,7 +12,15 @@
 </head>
 <body>
 
+<script>
+    $(document).ready(function() {
+        $('.btn-minus').click(function() {
+            var orderItemId = $(this).data('orderitem-id');
+            updateQuantity(orderItemId, 'minus');
+        });
 
+    });
+</script>
 <%@ include file="/layouts/footer.jsp"%>
 </body>
 </html>
