@@ -43,3 +43,22 @@
                       cols="50"> ${hash_code} </textarea>
 
         </div>
+<%--        <div class="mb-3">--%>
+<%--            <label  class="form-label">Tải xuống mã hash</label>--%>
+<%--            <a href="../downloadHashCode?fileName=${hashCodeFile}" class="btn btn-success mt-3">Tải Private Key</a>--%>
+<%--            --%>
+<%--        </div>--%>
+        <div class="mb-3">
+            <label for="digital_signature" class="form-label">Nhập chữ kí điện tử:
+            </label>
+            <textarea type="text" class="form-control" id="digital_signature"
+                      name="digital_signature" placeholder="Nhập chữ kí điện tử " rows="5"
+                      cols="50"> </textarea>
+
+        </div>
+        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%;">Xác Nhận Chữ Kí</button>
+    </form>
+</div>
+<%@ include file="/layouts/footer.jsp"%>
+</body>
+</html>
