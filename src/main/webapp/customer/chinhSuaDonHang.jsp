@@ -44,6 +44,9 @@
             var orderItemId = $(this).data('orderitem-id');
             updateQuantity(orderItemId, 'plus');
         });
+        function updateQuantity(orderItemId, doing) {
+
+        }
     });
 </script>
 <%@ include file="/layouts/footer.jsp"%>
