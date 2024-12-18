@@ -39,6 +39,11 @@
                 },
             });
         });
+        // Lắng nghe sự kiện click của nút "btn-plus"
+        $('.btn-plus').click(function() {
+            var orderItemId = $(this).data('orderitem-id');
+            updateQuantity(orderItemId, 'plus');
+        });
     });
 </script>
 <%@ include file="/layouts/footer.jsp"%>
