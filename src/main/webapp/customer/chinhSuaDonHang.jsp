@@ -45,7 +45,36 @@
             updateQuantity(orderItemId, 'plus');
         });
         function updateQuantity(orderItemId, doing) {
+            $.ajax({
+                url: '../customer?action=updateQuantityOnOrder',
+                method: 'POST',
+                data: {
+                    orderItem: orderItemId,
+                    update: doing
+                },
+                success: function(response) {
+                    if(response.status == 'update'){
+                        // Xử lý phản hồi từ server cho việc cập nhật số lượng
+                        // Cập nhật giao diện người dùng nếu cần
+                        var formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.priceUpdate);
+                        // Cập nhật số lượng hiển thị
+                        $('#quantity-'+orderItemId).val(response.quantity);
 
+                        var formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.priceProduct);
+                        var formattedPriceTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.totalPrice);
+
+                        $('#price-product').text(formattedPrice);
+                        $('#price-total').text(formattedPriceTotal);
+                    }else if(response.status == 'delete'){
+                        $('#order-item-' + orderItemId).remove();
+                        var formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.priceProduct);
+                        var formattedPriceTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.totalPrice);
+
+                        $('#price-product').text(formattedPrice);
+                        $('#price-total').text(formattedPriceTotal);
+                    }
+                },
+            });
         }
     });
 </script>
