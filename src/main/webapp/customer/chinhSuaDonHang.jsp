@@ -8,9 +8,28 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/dangKi.css">
+    <style>
+        .btn-check-voucher {
+            border: none;
+            background: #ee4d2d;
+            color: white;
+            border-radius: 5px
+        }
+        .product-name {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 50px; /* Điều chỉnh độ rộng phù hợp */
+        }
+
+    </style>
 </head>
+<%@ include file="/layouts/header.jsp"%>
+
 <body>
+
 
 <script>
     $(document).ready(function() {
