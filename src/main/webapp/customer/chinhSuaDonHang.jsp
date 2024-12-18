@@ -18,7 +18,27 @@
             var orderItemId = $(this).data('orderitem-id');
             updateQuantity(orderItemId, 'minus');
         });
+        $('.btn-remove').click(function (){
+            var orderItemId = $(this).data('orderitem-id');
+            $.ajax({
+                url: '../customer?action=removeOrderItem',
+                method: 'POST',
+                data: {
+                    orderItem: orderItemId,
+                },
+                success: function(response) {
+                    if(response.success){
+                        $('#order-item-' + orderItemId).remove();
+                        var formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.priceProduct);
+                        var formattedPriceTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.totalPrice);
 
+                        $('#price-product').text(formattedPrice);
+                        $('#price-total').text(formattedPriceTotal);
+
+                    }
+                },
+            });
+        });
     });
 </script>
 <%@ include file="/layouts/footer.jsp"%>
