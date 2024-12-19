@@ -9,12 +9,16 @@
          pageEncoding="UTF-8"%>
 <%@ page isELIgnored="false"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Title</title>
+    <meta charset="UTF-8">
+    <title>Xác nhận đặt hàng</title>
+    <%@ include file="/layouts/common.jsp"%>
+    <link rel="stylesheet" type="text/css" href="/assets/css/dangKi.css">
 </head>
 <body>
-
+<%@ include file="/layouts/header.jsp"%>
 
 
 <footer style="margin-top: 140px">
