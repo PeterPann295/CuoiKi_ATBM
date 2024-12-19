@@ -5,8 +5,12 @@
   Time: 06:37 SA
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%>
 <html>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <head>
     <link rel="stylesheet" type="text/css" href="/assets/css/dangKi.css">
     <style>
@@ -23,14 +27,11 @@
             text-overflow: ellipsis;
             max-width: 50px; /* Điều chỉnh độ rộng phù hợp */
         }
-
     </style>
 </head>
 <%@ include file="/layouts/header.jsp"%>
 
 <body>
-
-
 <script>
     $(document).ready(function() {
         $('.btn-minus').click(function() {
