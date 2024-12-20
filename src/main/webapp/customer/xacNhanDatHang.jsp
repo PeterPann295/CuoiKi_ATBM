@@ -99,3 +99,50 @@
                 <td>
                     <input class="form-check-input" style="margin-bottom: 10px" type="radio" id="cash_on_delivery" name="payment_method" value="1">
                     <label for="cash_on_delivery">Thanh toán khi nhận hàng</label><br>
+<%--                    <input class="form-check-input" type="radio" id="bank_transfer" name="payment_method" value="2">--%>
+<%--                    <label for="bank_transfer">Thanh toán qua ngân hàng</label>--%>
+                </td>
+            </tr>
+
+
+        </table>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Xác Nhận Đặt Hàng</button>
+    </form>
+</div>
+<script>
+    function validateVoucher() {
+        var voucherCode = $('#voucher_code').val();
+        if (voucherCode) {
+            $.ajax({
+                type: "POST",
+                url: "../customer?action=confirmVoucher", // Thay thế bằng URL của servlet của bạn
+                data: { voucherCode: voucherCode },
+                success: function(response) {
+                    if(response.status == 'incorrect'){
+                        console.log("da vao day")
+                        $('#incorrect').text("Voucher không hợp lệ");
+                        $('#voucherDiscount').css('display', 'none');
+                        var totalPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.totalPrice);
+                        $('#totalPrice').text(totalPrice);
+                    }else if(response.status == 'correct'){
+                        $('#incorrect').text("");
+                        var totalPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.totalPrice);
+                        var discount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(response.discount);
+                        $('#voucherDiscount').css('display', 'table-row');
+                        $('#totalPrice').text(totalPrice);
+                        $('#discount').text(discount);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("Đã xảy ra lỗi: " + error);
+                }
+            });
+        } else {
+            alert("Vui lòng nhập mã voucher.");
+        }
+    }
+</script>
+<%@ include file="/layouts/footer.jsp"%>
+</body>
+</html>
+
